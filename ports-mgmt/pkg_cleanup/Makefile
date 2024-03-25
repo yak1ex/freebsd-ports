@@ -12,6 +12,10 @@ WRKSRC=		${WRKDIR}/${PORTNAME}
 PLIST_FILES=	sbin/pkg_cleanup \
 		share/man/man1/pkg_cleanup.1.gz
 
+OPTIONS_DEFINE= ASCII
+ASCII_DESC=     Set ascii lines option for dialog
+ASCII_CFLAGS=   -DASCII_LINES
+
 do-extract:
 	@${MKDIR} ${WRKSRC}
 	@${CP} -a ${FILESDIR}/ ${WRKSRC}

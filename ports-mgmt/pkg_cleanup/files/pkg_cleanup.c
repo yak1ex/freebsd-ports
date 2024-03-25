@@ -144,6 +144,9 @@ display_menu(void)
 
 	do_init_dialog();
 	getmaxyx(stdscr, maxy, maxx);
+#if defined(ASCII_LINES)
+	dialog_vars.ascii_lines=1;
+#endif
 	dialog_vars.help_button=1;
 	dialog_vars.item_help=1;
 loop:
