@@ -26,7 +26,8 @@ EXTRACT_AFTER_ARGS=	--exclude libssh2 --exclude libgit2	\
 			--exclude nghttp2 --exclude curl-sys/curl	\
 			--exclude include/curl --exclude "curl-sys-*/curl" \
 			--exclude openssl-src/openssl	\
-			--exclude "libz-sys/src/libz*"
+			--exclude libsqlite3-sys-*/sql*/*.[ch] \
+			--exclude libz-sys*/src/libz*
 
 ONLY_FOR_ARCHS?=	aarch64 amd64 armv7 i386 powerpc64 powerpc64le powerpc \
 			riscv64
@@ -36,13 +37,14 @@ LIB_DEPENDS=	libcurl.so:ftp/curl	\
 		libgit2.so:devel/libgit2	\
 		libssh2.so:security/libssh2
 
-USES=		cmake:indirect cpe localbase ninja:build pkgconfig python:build ssl tar:xz
+USES=		cmake:indirect cpe localbase ninja:build pkgconfig python:build ssl tar:xz sqlite
 
 CPE_VENDOR=	rust-lang
 
 MAKE_ENV=	DESTDIR=${STAGEDIR} \
-		LIBSSH2_SYS_USE_PKG_CONFIG=yes	\
 		LIBGIT2_NO_VENDOR=1 \
+		LIBSSH2_SYS_USE_PKG_CONFIG=yes	\
+		LIBSQLITE3_SYS_USE_PKG_CONFIG=yes	\
 		OPENSSL_DIR="${OPENSSLBASE}"
 TEST_ENV=	${MAKE_ENV} \
 		ALLOW_NONZERO_RLIMIT_CORE=1
