@@ -22,29 +22,18 @@ LICENSE_COMB=	dual
 LICENSE_FILE_APACHE20=	${WRKSRC}/LICENSE-APACHE
 LICENSE_FILE_MIT=	${WRKSRC}/LICENSE-MIT
 
-EXTRACT_AFTER_ARGS=	--exclude libssh2 --exclude libgit2	\
-			--exclude nghttp2 --exclude curl-sys/curl	\
-			--exclude include/curl --exclude "curl-sys-*/curl" \
-			--exclude openssl-src/openssl	\
-			--exclude libsqlite3-sys-*/sql*/*.[ch] \
-			--exclude libz-sys*/src/libz*
-
 ONLY_FOR_ARCHS?=	aarch64 amd64 armv7 i386 powerpc64 powerpc64le powerpc \
 			riscv64
 ONLY_FOR_ARCHS_REASON?=	requires prebuilt bootstrap compiler
 
-LIB_DEPENDS=	libcurl.so:ftp/curl	\
-		libgit2.so:devel/libgit2	\
-		libssh2.so:security/libssh2
+LIB_DEPENDS=	libcurl.so:ftp/curl
 
-USES=		cmake:indirect cpe localbase ninja:build pkgconfig python:build ssl tar:xz sqlite
+USES=		cmake:indirect cpe ninja:build pkgconfig python:build ssl tar:xz
 
 CPE_VENDOR=	rust-lang
 
 MAKE_ENV=	DESTDIR=${STAGEDIR} \
-		LIBGIT2_NO_VENDOR=1 \
-		LIBSSH2_SYS_USE_PKG_CONFIG=yes	\
-		LIBSQLITE3_SYS_USE_PKG_CONFIG=yes	\
+		LIBGIT2_NO_PKG_CONFIG=1 \
 		OPENSSL_DIR="${OPENSSLBASE}"
 TEST_ENV=	${MAKE_ENV} \
 		ALLOW_NONZERO_RLIMIT_CORE=1
@@ -116,14 +105,9 @@ _COMPONENTS+=		cargo-${_PACKAGE_VERS}-${_RUST_TARGET} \
 IGNORE=		is only for FreeBSD
 .endif
 
-.if ${PORT_OPTIONS:MPORT_LLVM}
-# We still must have llvm-project/libunwind at this time:
-EXTRACT_AFTER_ARGS+=	--exclude llvm-project/ll* --exclude llvm-project/c* --exclude llvm-project/r*
-.endif
-
 .if ${ARCH} == powerpc
 LIB_DEPENDS+=	libatomic.so:lang/gcc${GCC_DEFAULT}
-MAKE_ENV+=	RUSTFLAGS="-L${LOCALBASE}/lib/gcc${GCC_DEFAULT}"
+MAKE_ENV+=	RUSTFLAGS="-L/usr/local/lib/gcc${GCC_DEFAULT}"
 .endif
 
 .if ${ARCH} != powerpc64le
@@ -176,11 +160,6 @@ do-configure:
 		${SH} install.sh --prefix=${WRKDIR}/bootstrap --verbose
 .endfor
 	@${ECHO_CMD} '[build]' >> ${WRKSRC}/config.toml
-.if ${PORT_OPTIONS:MPORT_LLVM}
-# Without llvm-project/compiler-rt, need to set this flag to false
-# see https://issues.guix.gnu.org/69981
-	@${ECHO_CMD} 'optimized-compiler-builtins=false' >> ${WRKSRC}/config.toml
-.endif
 	@${ECHO_CMD} 'build-dir="${WRKDIR}/_build"' >> ${WRKSRC}/config.toml
 	@${ECHO_CMD} 'build-stage=2' >> ${WRKSRC}/config.toml
 	@${ECHO_CMD} 'doc-stage=2' >> ${WRKSRC}/config.toml
